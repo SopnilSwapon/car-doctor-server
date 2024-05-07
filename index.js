@@ -10,7 +10,7 @@ const port = process.env.PORT || 5000;
 
 // middleware //
 app.use(cors({
-  origin: ['http://localhost:5174'],
+  origin: ['http://localhost:5173'],
   credentials: true
 }))
 app.use(express.json());
@@ -67,6 +67,12 @@ async function run() {
       })
 
       .send({success: true})
+    });
+
+    app.post('/logout', async(req, res) => {
+      const user = req.body;
+      console.log("log out user", user);
+      res.clearCookie('token', {maxAge: 0}).send({success: true})
     })
  
 
@@ -80,7 +86,7 @@ async function run() {
       const result = await query.toArray();
       res.send(result)
     });
-    //_________________ A specific service load___________ //
+    //_________________ A specific service load___________//
     app.get('/services/:id', async(req, res) => {
       const id = req.params.id;
       const query = {_id: new ObjectId(id)};
@@ -100,7 +106,8 @@ async function run() {
     })
     // _______get orders of specific email___________//
     app.get('/order', logger, verifyToken,  async (req, res) => {
-      console.log('from valid token', req.user)
+      // console.log('from valid token', req.user)
+      console.log('i am a current login user', req.query.email);
       if(req.query.email !== req.user.email){
         return res.status(403).send({message: 'forbidden access'})
       }
