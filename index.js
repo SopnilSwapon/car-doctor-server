@@ -1,19 +1,20 @@
+require('dotenv').config()
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cookieParser = require('cookie-parser');
-require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 5000;
 
 
 // middleware //
-app.use(cors({
-  // origin: ['http://localhost:5173'],
-  origin: ['https://car-doctor-a863b.web.app/', 'https://car-doctor-a863b.firebaseapp.com/'],
-  credentials: true
-}))
+app.use(
+  cors({
+      origin: ['http://localhost:5173', 'https://car-doctor-a863b.web.app'],
+      credentials: true,
+  }),
+)
 app.use(express.json());
 app.use(cookieParser())
 
@@ -83,8 +84,16 @@ async function run() {
     const orderCollection = client.db('carDoctor').collection('order');
    //_______________All services load_______________________// 
     app.get('/services', logger, async(req, res) => {
-      const query = servicesCollection.find();
-      const result = await query.toArray();
+      const filter = req.query;
+      const query = {
+        //  price: { $gt: 200}
+        };
+      const options = {
+        sort: {
+          price: filter.sort === 'asc' ? 1 : -1
+        }
+      }
+      const result = await servicesCollection.find(query, options).toArray();
       res.send(result)
     });
     //_________________ A specific service load___________//
